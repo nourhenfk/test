@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   CButton,
@@ -21,11 +21,14 @@ const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const handleLogin = async (e) => {
     e.preventDefault()
+    setLoading(true)
+    setError('')
+    
     try {
       const response = await axios.post('http://localhost:5000/api/auth/login', {
         email,
@@ -34,19 +37,17 @@ const Login = () => {
 
       const token = response.data.token
       localStorage.setItem('token', token)
-      setIsLoggedIn(true)  // <-- change l'état ici
+      
+      // Force a page reload to trigger the App component to re-evaluate the token
+      window.location.href = '#/dashboard'
+      window.location.reload()
+      
     } catch (err) {
       setError(err.response?.data?.error || 'Erreur lors de la connexion')
+    } finally {
+      setLoading(false)
     }
   }
-
-  useEffect(() => {
-    if (isLoggedIn) {
-    console.log('avant navigation')
-navigate('/dashboard', { replace: true })
-console.log('après navigation')  // navigation déclenchée via useEffect
-    }
-  }, [isLoggedIn, navigate])
 
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
@@ -70,6 +71,7 @@ console.log('après navigation')  // navigation déclenchée via useEffect
                         autoComplete="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        disabled={loading}
                       />
                     </CInputGroup>
 
@@ -83,13 +85,19 @@ console.log('après navigation')  // navigation déclenchée via useEffect
                         autoComplete="current-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        disabled={loading}
                       />
                     </CInputGroup>
 
                     <CRow>
                       <CCol xs={6}>
-                        <CButton color="primary" type="submit" className="px-4">
-                          Login
+                        <CButton 
+                          color="primary" 
+                          type="submit" 
+                          className="px-4"
+                          disabled={loading}
+                        >
+                          {loading ? 'Connexion...' : 'Login'}
                         </CButton>
                       </CCol>
                     </CRow>
