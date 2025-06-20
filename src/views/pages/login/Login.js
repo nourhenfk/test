@@ -61,6 +61,7 @@ const Login = () => {
                     <h1>Login Admin</h1>
                     <p className="text-body-secondary">Connectez-vous à votre compte</p>
                     {error && <p style={{ color: 'red' }}>{error}</p>}
+                    }
 
                     <CInputGroup className="mb-3">
                       <CInputGroupText>
